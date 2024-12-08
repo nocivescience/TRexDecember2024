@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .container {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
+</style>
+
+<body>
+    <div class="container"></div>
+    <script>
+        class Enviroment {
+            constructor(x) {
+                this.x = x;
+                this.image = new Image();
+                this.image.src = "./enviroment.png";
+                this.image.onload = () => {
+                    console.log("Image loaded");
+                    this.imageLoaded = true;
+                }
+                this.imageLoaded = false;
+            }
+        }
+        class Rex {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.image1 = new Image();
+                this.image1.src = "./trex1.png";
+                this.image2 = new Image();
+                this.image2.src = "./trex2.png";
+                this.image1Loaded = false;
+                this.image2Loaded = false;
+                this.image1.onload = () => {
+                    this.image1Loaded = true;
+                }
+                this.image2.onload = () => {
+                    this.image2Loaded = true;
+                }
+                this.currentImage = this.image1;
+                this.jump = undefined;
+                this.right = undefined;
+                this.left = undefined;
+                this.gravity = 0.5;
+                this.jumpPower = 10;
+            }
+            alternateImages() {
+                setInterval(() => {
+                    if (!this.image1Loaded || !this.image2Loaded) {
+                        return;
+                    }
+                    if (this.currentImage == this.image1) {
+                        this.currentImage = this.image2;
+                    } else {
+                        this.currentImage = this.image1;
+                    }
+
+                    if (this.x > window.innerWidth) {
+                        this.x = 0;
+                    }
+                    if(this.jump){
+                        this.y -= this.jumpPower;
+                        this.jumpPower -= this.gravity;
+                        if(this.y >= window.innerHeight - 300){
+                            this.jump = undefined;
+                            this.y = window.innerHeight - 300;
+                            this.jumpPower = 10;
+                        }
+                    }
+                    if(this.right){
+                        this.x -= 15;
+                    }
+                    if(this.left){
+                        this.x += 15;
+                    }
+                }, 100);
+            }
+        }
+        const enviroment = new Enviroment(0);
+        const rex = new Rex(100, window.innerHeight - 300);
+        document.addEventListener("keydown", (e) => {
+            if (e.key == " ") {
+                rex.jump = true;
+            }
+            if(e.key == "a"){
+                rex.right = true;
+            }
+            if(e.key == "d"){
+                rex.left = true;
+            }
+        });
+        document.addEventListener("keyup", (e) => {
+            if(e.key == "a"){
+                rex.right = false;
+            }
+            if(e.key == "d"){
+                rex.left = false;
+            }
+        });
+        rex.alternateImages();
+        setInterval(() => {
+            if (!enviroment.imageLoaded || !rex.image1Loaded || !rex.image2Loaded) {
+                return;
+            }
+            enviroment.x -= 1;
+            if (enviroment.x < -window.innerWidth) {
+                enviroment.x = 0;
+            }
+            const canvas = document.createElement("canvas");
+            canvas.setAttribute("width", canvas.width);
+            canvas.setAttribute("height", canvas.height);
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(enviroment.image, enviroment.x, 0, canvas.width, canvas.height);
+            ctx.drawImage(enviroment.image, enviroment.x + canvas.width, 0, canvas.width, canvas.height);
+            ctx.drawImage(rex.currentImage, rex.x, rex.y, 100, 100);
+            document.querySelector(".container").innerHTML = "";
+            document.querySelector(".container").appendChild(canvas);
+        }, 1000 / 60);
+    </script>
+</body>
+</html>
