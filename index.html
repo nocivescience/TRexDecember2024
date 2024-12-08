@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f1f1f1;
+    }
+    .container {
+        width: 1200px;
+        height: 700px;
+        position: relative;
+        border: 1px solid #000;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .number {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        font-family: Arial, sans-serif;
+    }
+</style>
+<body>
+    <div class="container"></div>
+    <script>
+        const containerEl = document.querySelector('.container');
+
+        class Cube {
+            constructor(x, container) {
+                this.x = x;
+                this.container = container;
+                this.cube = this.createCube();
+                this.cubes = [];
+                this.numbers = [];
+                this.direction = 1;
+                this.speed = 1;
+                this.trainCubes();
+            }
+
+            moving() {
+                const containerWidth = this.container.offsetWidth;
+                if (this.x + 100 >= containerWidth) {
+                    this.direction = -1;
+                } else if (this.x <= 0) {
+                    this.direction = 1;
+                }
+
+                this.x += this.speed * this.direction;
+                this.cube.style.left = `${this.x}px`;
+                this.checkOverlap();
+                requestAnimationFrame(this.moving.bind(this));
+            }
+
+            createCube() {
+                const cube = document.createElement('div');
+                cube.style.width = '100px';
+                cube.style.height = '100px';
+                cube.style.backgroundColor = 'red';
+                cube.style.position = 'absolute';
+                // Posicionar el cubo rojo en el centro vertical del contenedor
+                cube.style.top = '300px';
+                cube.style.left = `${this.x}px`;
+                this.container.appendChild(cube);
+                return cube;
+            }
+
+            trainCubes() {
+                for(let i of Array(10).keys()) {
+                    const cube = document.createElement('div');
+                    cube.style.width = '100px';
+                    cube.style.height = '100px';
+                    cube.style.backgroundColor = 'transparent';
+                    cube.style.border = '1px solid #000';
+                    cube.style.position = 'absolute';
+                    // Posicionar los cuadros transparentes en el centro vertical del contenedor
+                    cube.style.top = '300px';
+                    cube.style.left = `${this.x + 100 * i+100}px`;
+                    
+                    const number = document.createElement('div');
+                    number.className = 'number';
+                    number.textContent = '0';
+                    cube.appendChild(number);
+                    
+                    this.container.appendChild(cube);
+                    this.cubes.push(cube);
+                    this.numbers.push(0);
+                }
+            }
+
+            checkOverlap() {
+                const redCubeRect = {
+                    left: this.x,
+                    right: this.x + 100
+                };
+
+                this.cubes.forEach((cube, index) => {
+                    const transparentCubeLeft = parseInt(cube.style.left);
+                    
+                    if (redCubeRect.left >= transparentCubeLeft && 
+                        redCubeRect.right <= transparentCubeLeft + 100) {
+                        const currentNumber = this.numbers[index];
+                        this.numbers[index] = currentNumber + 1;
+                        cube.querySelector('.number').textContent = this.numbers[index];
+                    }
+                });
+            }
+        }
+
+        const cube = new Cube(0, containerEl);
+        cube.moving();
+    </script>
+</body>
+</html>
